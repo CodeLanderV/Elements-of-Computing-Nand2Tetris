@@ -41,5 +41,66 @@ CHIP ALU {
         ng;      // if (out < 0)  equals 1, else 0
 
     PARTS:
+    /**
+    // for zx
+    Mux16(a = false, b = x, sel = zx, out = zxout);
+    // for zy
+    Mux16(a = false, b = y, sel = zy, out = zyout);
+    // negatechecks
+    Not16(in = zxout, out = notzxout);
+    Not16(in = zyout, out = notzyout);
+    // for nx
+    Mux16(a = zxout, b = notzxout, sel = nx, out = XforF);
+    // for ny
+    Mux16(a = zyout, b = notzyout, sel = ny, out = YforF);
+    // for AND
+    And16(a = XforF, b = YforF, out = F0);
+    // for ADD
+    Add16(a = XforF, b = YforF, out = F1);
+    // for f
+    Mux16(a = F0, b = F1, sel = f, out = Fout);
+    // for negative
+    Not16(in = Fout, out = NotFout);
+    // for no
+    Mux16(a = Fout, b = NotFout, sel = no, out[0..7]=forOr1, out[8..15] = forOr2, out[15]=ng, out = out);
+    // for zr
+    Or8Way(in = forOr1, out = orout1);
+    Or8Way(in = forOr2, out = orout2);
+    Or(a = orout1, b = orout2, out = orout);
+    Not(in = orout, out = zr);
+}
+**/
+    
     //// Replace this comment with your code.
+    // btw false means 0 and true means 1
+    // for x
+    Mux16(a=x, b=false, sel=zx, out=x0); //let x0 be new output
+    Not16(in=x0, out=notx0); //notx0 is not x0
+    Mux16(a=x0, b=notx0, sel=nx, out=x1); // this is final x
+
+    //for y
+    Mux16(a=y, b=false, sel=zy, out=y0); //let y0 be new output
+    Not16(in=y0, out=noty0); //noty0 is not y0 
+    Mux16(a=y0, b=noty0, sel=ny, out=y1); // this is final y
+
+    //AND16
+    And16(a=x1, b=y1, out=andOut);
+
+    //ADD16s
+    Add16(a=x1, b=y1, out=addOut);
+
+    //Mux16 for f
+    Mux16(a=andOut, b=addOut, sel=f, out=fOut);
+
+    //Not16
+    Not16(in=fOut, out=notOut);
+
+    //Mux16 for no
+    Mux16(a=fOut, b=notOut, sel=no, out=out, out[0..7]=zr1, out[8..15]=zr2, out[15]=ng);
+
+    //for zr
+    Or8Way(in=zr1, out=orOut1);
+    Or8Way(in=zr2, out=orOut2);
+    Or(a=orOut1, b=orOut2, out=orOut3);
+    Not(in=orOut3, out=zr);
 }
