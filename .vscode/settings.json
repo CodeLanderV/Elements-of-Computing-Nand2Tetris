@@ -1,0 +1,12 @@
+{
+    "C_Cpp.autocomplete": "disabled",
+    "typescript.suggest.completeJSDocs": false,
+    "css.completion.completePropertyWithSemicolon": false,
+    "less.completion.completePropertyWithSemicolon": false,
+    "scss.completion.completePropertyWithSemicolon": false,
+    "javascript.suggest.enabled": false,
+    "typescript.suggest.enabled": false,
+    "python.autoComplete.extraPaths": [
+        
+    ]
+}

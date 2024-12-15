@@ -1,0 +1,12 @@
+CHIP Decoder{
+    IN Sel[2];
+    OUT a, b, c, d;
+
+    PARTS:
+    Not(in = sel[0], out = notsel0);
+    Not(in = sel[1], out = notsel1);
+    And(a = notsel0, b = notsel1, out = d);
+    And(a = notsel0, b = sel[1], out = b);
+    And(a = sel[0], b = notsel1, out = c);
+    And(a = sel[1], b = sel[0], out = d);
+}
