@@ -87,8 +87,8 @@ J1 - <, J2 - = , J3 ->
     And( a = JumpEqual, b = zeroFlag, out = JMPE);
 
     // JMPE + JMPL + JMPG
-    Or(a = JMPE, b = JMPL, out = WaitRa);
-    Or(a = WaitRa, b = JMPG, out = jump);
+    Or(a = JMPE, b = JMPG, out = WaitRa);
+    Or(a = WaitRa, b = JMPL, out = jump);
 
     // program counter: Pins are: in, load, inc, reset 
     PC(in = AtoAorM, load = jump, inc = true, reset = reset, out[0..14] = pc);
