@@ -31,6 +31,67 @@ CHIP CPU {
         addressM[15],    // Address in data memory (of M)
         pc[15];          // address of next instruction
 
+/**
+A - D1, D = D2, M = D3. BUT FOR DEALING WITH M, we wont use D3; we will use the 'A' in the C instruction.
+D3 = M, is used to determine if we should send it to the R
+J1 - <, J2 - = , J3 ->
+**/
+
     PARTS:
-	//// Replace this comment with your code.
+    // first order of buisness, which instruction is it?
+    Not(in = instruction[15], out = notopcode);
+    // which one should i take from? the ALU output or the Instruction input?
+    Mux16(a = ALUoutput, b = instruction, sel = notopcode, out = GoToARegist);
+
+    // now, shall i put it in A register or not? [btw, D1 deals with A register]
+    Or(a = instruction[15], b = instruction[5], out = LoadA);
+    // now i am putting into A
+    ARegister(in = GoToARegist, load = LoadA, out = AtoAorM, out[0..14]=addressM);
+
+    // now lets deal with First Input of ALU. It is always D register.
+    // should i use the D register, our not? OR should i load the D register with new output or not?
+    And(a = instruction[15], b = instruction[4], out = LoadD);
+    DRegister(in = ALUoutput, load = LoadD, out = ALUXInput);
+
+    // now lets decide if i should use A or M for the second in put
+    And(a = instruction[15], b = instruction[12], out = DecideAorM);
+    Mux16(a = AtoAorM, b = inM, sel = DecideAorM, out = ALUYInput);
+
+    // ALU FUNCTIONS: ALU PINS [ X, Y | zx nx zy ny f no | out=aluout, out = outM| zg, ng]
+    // zx = c1 = instruction11,..........................
+    ALU(x=ALUXInput, y=ALUYInput, 
+        zx=instruction[11], nx=instruction[10], 
+        zy=instruction[9], ny=instruction[8], 
+        f=instruction[7], no=instruction[6], 
+        out=ALUoutput, out=outM, zr=zeroFlag, ng=negFlag);
+
+    // should i write to Memory flag?
+    And(a = instruction[15], b = instruction[3], out = writeM);
+
+    // jump logic
+    // first, lets have both negatives and positive flags. makes life easier innit
+    Not(in = negFlag, out = posFlag); // negative and positive
+    Not(in = zeroFlag, out = nonzeroFlag); // zero and nonzero
+
+    // flag for Jump greater JMPG - positive non zero
+    And(a = instruction[15], b = instruction[0], out = JumpGreat);
+    And(a = nonzeroFlag, b = posFlag, out = positiveNonZero);
+    And(a = positiveNonZero, b = JumpGreat, out = JMPG);
+
+    // flag for Jump less JMPL - negFlag
+    And(a = instruction[15], b = instruction[2], out = JumpLess);
+    And(a = JumpLess, b = negFlag, out = JMPL);
+
+    // flag for Jump Equal JMPE - zeroFlag
+    And( a = instruction[15], b = instruction[1], out = JumpEqual);
+    And( a = JumpEqual, b = zeroFlag, out = JMPE);
+
+    // JMPE + JMPL + JMPG
+    Or(a = JMPE, b = JMPL, out = WaitRa);
+    Or(a = WaitRa, b = JMPG, out = jump);
+
+    // program counter: Pins are: in, load, inc, reset 
+    PC(in = AtoAorM, load = jump, inc = true, reset = reset, out[0..14] = pc);
+
+
 }
