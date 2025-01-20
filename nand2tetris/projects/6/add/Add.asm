@@ -11,3 +11,6 @@ D=A
 D=D+A
 @0
 M=D
+(end)
+@end
+0;JMP

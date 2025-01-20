@@ -7,32 +7,34 @@
 // The rectangle is 16 pixels wide and R0 pixels high.
 // Usage: Before executing, put a value in R0.
 
-   // If (R0 <= 0) goto END else n = R0
-   @R0
+   // If (R0 <= 0) goto END else counter   = R0
+   @R0  // ram 0 geting value
    D=M
    @END
    D;JLE 
-   @n
+   @counter 
    M=D
-   // addr = base address of first screen row
+   // ADDRESS = base ADDRESSess of first screen row
    @SCREEN
    D=A
-   @addr
+   @R1
+   D = D+A
+   @ADDRESS
    M=D
 (LOOP)
-   // RAM[addr] = -1
-   @addr
+   // RAM[ADDRESS] = -1
+   @ADDRESS
    A=M
    M=-1
-   // addr = base address of next screen row
-   @addr
+   // ADDRESS = base ADDRESSess of next screen row
+   @ADDRESS
    D=M
    @32
    D=D+A
-   @addr
+   @ADDRESS
    M=D
-   // decrements n and loops
-   @n
+   // decrements counter    and loops
+   @counter 
    MD=M-1
    @LOOP
    D;JGT
